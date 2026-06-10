@@ -164,8 +164,6 @@ import com.arturo254.opentune.constants.DynamicThemeKey
 import com.arturo254.opentune.constants.FloatingToolbarBottomPadding
 import com.arturo254.opentune.constants.FloatingToolbarHeight
 import com.arturo254.opentune.constants.FloatingToolbarHorizontalPadding
-import com.arturo254.opentune.constants.HasPressedStarKey
-import com.arturo254.opentune.constants.LaunchCountKey
 import com.arturo254.opentune.constants.LiquidGlassNavBarKey
 import com.arturo254.opentune.constants.LyricsSyncOffsetKey
 import com.arturo254.opentune.constants.MiniPlayerBottomSpacing
@@ -174,7 +172,6 @@ import com.arturo254.opentune.constants.MiniPlayerLastAnchorKey
 import com.arturo254.opentune.constants.NavigationBarAnimationSpec
 import com.arturo254.opentune.constants.PauseSearchHistoryKey
 import com.arturo254.opentune.constants.PureBlackKey
-import com.arturo254.opentune.constants.RemindAfterKey
 import com.arturo254.opentune.constants.SYSTEM_DEFAULT
 import com.arturo254.opentune.constants.SearchSource
 import com.arturo254.opentune.constants.SearchSourceKey
@@ -244,7 +241,6 @@ import com.arturo254.opentune.ui.utils.appBarScrollBehavior
 import com.arturo254.opentune.ui.utils.backToMain
 import com.arturo254.opentune.ui.utils.resetHeightOffset
 import com.arturo254.opentune.utils.SyncUtils
-import com.arturo254.opentune.utils.UpdateNotificationManager
 import com.arturo254.opentune.utils.Updater
 import com.arturo254.opentune.utils.dataStore
 import com.arturo254.opentune.utils.get
@@ -470,7 +466,6 @@ class MainActivity : ComponentActivity() {
                         latestVersionName = it
                     }
                 }
-                UpdateNotificationManager.checkForUpdates(this@MainActivity)
             }
 
             // Use remembered instances so the same state object is used everywhere
@@ -1028,38 +1023,6 @@ class MainActivity : ComponentActivity() {
                             handleDeepLinkIntent(intent, navController)
                         }
                     }
-
-                    var showStarDialog by remember { mutableStateOf(false) }
-
-                    LaunchedEffect(Unit) {
-                        delay(3000)
-
-                        withContext(Dispatchers.IO) {
-                            val current = dataStore[LaunchCountKey] ?: 0
-                            val newCount = current + 1
-                            dataStore.edit { prefs ->
-                                prefs[LaunchCountKey] = newCount
-                            }
-                        }
-
-                        val shouldShow = withContext(Dispatchers.IO) {
-                            val hasPressed = dataStore[HasPressedStarKey] ?: false
-                            val remindAfter = dataStore[RemindAfterKey] ?: 3
-                            !hasPressed && (dataStore[LaunchCountKey] ?: 0) >= remindAfter
-                        }
-
-                        if (shouldShow) {
-                            var waited = 0L
-                            val waitStep = 500L
-                            val maxWait = 30_000L
-                            while (bottomSheetPageState.isVisible && waited < maxWait) {
-                                delay(waitStep)
-                                waited += waitStep
-                            }
-                            showStarDialog = true
-                        }
-                    }
-
 
                     val currentTitleRes = remember(navBackStackEntry) {
                         when (navBackStackEntry?.destination?.route) {

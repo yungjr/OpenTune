@@ -554,11 +554,6 @@ val CountryCodeToName =
         "AE" to "United Arab Emirates",
     )
 
-// App rating / star prompt preferences
-val LaunchCountKey = intPreferencesKey("launch_count")
-val HasPressedStarKey = booleanPreferencesKey("has_pressed_star")
-val RemindAfterKey = intPreferencesKey("remind_after")
-
 // Update settings
 val EnableUpdateNotificationKey = booleanPreferencesKey("enableUpdateNotification")
 val UpdateChannelKey = stringPreferencesKey("updateChannel")

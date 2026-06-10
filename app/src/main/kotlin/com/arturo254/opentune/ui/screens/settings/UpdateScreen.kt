@@ -87,7 +87,6 @@ import com.arturo254.opentune.ui.component.SwitchPreference
 import com.arturo254.opentune.ui.utils.backToMain
 import com.arturo254.opentune.utils.GitCommit
 import com.arturo254.opentune.utils.UpdateInfo
-import com.arturo254.opentune.utils.UpdateNotificationManager
 import com.arturo254.opentune.utils.Updater
 import com.arturo254.opentune.utils.rememberEnumPreference
 import com.arturo254.opentune.utils.rememberPreference
@@ -154,7 +153,6 @@ fun UpdateScreen(
         hasNotificationPermission = granted
         if (granted) {
             onEnableUpdateNotificationChange(true)
-            UpdateNotificationManager.schedulePeriodicUpdateCheck(context)
         }
     }
 
@@ -200,7 +198,6 @@ fun UpdateScreen(
                     permissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
                 else {
                     onEnableUpdateNotificationChange(true)
-                    UpdateNotificationManager.schedulePeriodicUpdateCheck(context)
                 }
             },
             onDismiss = { showNotifConfirmDialog = false }
@@ -356,7 +353,6 @@ fun UpdateScreen(
                         if (enabled) showNotifConfirmDialog = true
                         else {
                             onEnableUpdateNotificationChange(false)
-                            UpdateNotificationManager.cancelPeriodicUpdateCheck(context)
                         }
                     }
                 )

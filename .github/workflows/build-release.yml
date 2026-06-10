@@ -1,0 +1,61 @@
+name: Build Release APK
+
+on:
+  workflow_dispatch:          # 手動觸發
+  push:
+    tags:
+      - 'v*'                  # 推送 tag（例如 v1.0.0）時自動觸發
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      # ── 1. 取得程式碼 ──────────────────────────────────────────────
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      # ── 2. 設定 Java 21 ────────────────────────────────────────────
+      - name: Set up JDK 21
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 21
+          cache: gradle
+
+      # ── 3. 給 gradlew 執行權限 ─────────────────────────────────────
+      - name: Grant execute permission
+        run: chmod +x gradlew
+
+      # ── 4. 從 Secrets 還原簽署 Keystore ───────────────────────────
+      - name: Decode Keystore
+        run: |
+          echo "${{ secrets.KEYSTORE_BASE64 }}" | base64 --decode > app/keystore/release.keystore
+
+      # ── 5. 編譯 Universal Release APK ─────────────────────────────
+      - name: Build Universal Release APK
+        env:
+          STORE_PASSWORD: ${{ secrets.STORE_PASSWORD }}
+          KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
+          KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
+        run: ./gradlew assembleUniversalRelease
+
+      # ── 6. 上傳 APK 為 Artifact（可直接下載）──────────────────────
+      - name: Upload APK Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: OpenTune-universal-release
+          path: app/build/outputs/apk/universal/release/*.apk
+          retention-days: 30
+
+      # ── 7. 如果是 tag 觸發，自動建立 GitHub Release ───────────────
+      - name: Create GitHub Release
+        if: startsWith(github.ref, 'refs/tags/')
+        uses: softprops/action-gh-release@v2
+        with:
+          files: app/build/outputs/apk/universal/release/*.apk
+          generate_release_notes: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
